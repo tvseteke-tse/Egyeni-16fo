@@ -17,7 +17,7 @@
     .card-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; color: #8b949e; }
     .row { display: flex; gap: 5px; align-items: center; margin-bottom: 6px; }
     input[type="text"].p-name { flex: 1; background: #2a2a2a; border: 1px solid #444; color: white; padding: 6px; border-radius: 4px; font-weight: bold; }
-    input[type="text"].p-team { flex: 1; background: #2a2a2a; border: 1px solid #444; color: #3fb950; padding: 6px; border-radius: 4px; }
+    input[type="text"].p-club { flex: 1; background: #2a2a2a; border: 1px solid #444; color: #3fb950; padding: 6px; border-radius: 4px; }
     .stats-inputs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; background: #252525; padding: 6px; border-radius: 4px; }
     .set-box { display: flex; flex-direction: column; gap: 3px; background: #1a1a1a; padding: 4px; border-radius: 4px; text-align: center; }
     .set-box label { font-size: 0.75rem; color: #3fb950; font-weight: bold; }
@@ -57,13 +57,13 @@ function init() {
     container.innerHTML = '';
     for (let i = 0; i < totalPlayers; i++) {
         container.innerHTML += `
-            <div class="card">
+            <div class="card" data-idx="${i}">
                 <div class="card-header">
                     <span>#${i + 1} Játékos</span>
                 </div>
                 <div class="row">
                     <input type="text" class="p-name" placeholder="Játékos neve" oninput="sendData()">
-                    <input type="text" class="p-team" placeholder="Csapat / Egyesület" oninput="sendData()">
+                    <input type="text" class="p-club" placeholder="Egyesület" oninput="sendData()">
                 </div>
                 <div class="stats-inputs">
                     ${[0,1,2,3].map(s => `
@@ -78,6 +78,47 @@ function init() {
             </div>
         `;
     }
+
+    loadData();
+}
+
+function loadData() {
+    db.ref('egyeni_16_bowling').once('value').then(snapshot => {
+        const data = snapshot.val();
+        if (!data) return;
+
+        if (data.title) {
+            document.getElementById('tournamentTitle').value = data.title;
+        }
+
+        if (data.players && Array.isArray(data.players)) {
+            const cards = document.querySelectorAll('.card');
+            data.players.forEach((player, idx) => {
+                if (cards[idx]) {
+                    const card = cards[idx];
+                    
+                    // Név és Egyesület visszaállítása
+                    if (player.name && !player.name.startsWith("Játékos ")) {
+                        card.querySelector('.p-name').value = player.name;
+                    }
+                    if (player.club && player.club !== '-') {
+                        card.querySelector('.p-club').value = player.club;
+                    }
+
+                    // Részletes szett adatok visszaállítása
+                    if (player.rawSets) {
+                        player.rawSets.forEach((sData, sIdx) => {
+                            if (sData) {
+                                card.querySelector(`.p-teli${sIdx}`).value = sData.teli !== undefined && sData.teli !== 0 ? sData.teli : '';
+                                card.querySelector(`.p-tarol${sIdx}`).value = sData.tarol !== undefined && sData.tarol !== 0 ? sData.tarol : '';
+                                card.querySelector(`.p-ures${sIdx}`).value = sData.ures !== undefined && sData.ures !== 0 ? sData.ures : '';
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    });
 }
 
 function sendData() {
@@ -87,26 +128,39 @@ function sendData() {
 
     cards.forEach((card, idx) => {
         const name = card.querySelector('.p-name').value;
-        const team = card.querySelector('.p-team').value;
+        const club = card.querySelector('.p-club').value;
         let totalTeli = 0, totalTarol = 0, totalUres = 0;
         const sets = [];
+        const rawSets = [];
 
         for (let s = 0; s < 4; s++) {
-            const teli = parseInt(card.querySelector(`.p-teli${s}`).value) || 0;
-            const tarol = parseInt(card.querySelector(`.p-tarol${s}`).value) || 0;
-            const ures = parseInt(card.querySelector(`.p-ures${s}`).value) || 0;
+            const teliVal = card.querySelector(`.p-teli${s}`).value;
+            const tarolVal = card.querySelector(`.p-tarol${s}`).value;
+            const uresVal = card.querySelector(`.p-ures${s}`).value;
+
+            const teli = parseInt(teliVal) || 0;
+            const tarol = parseInt(tarolVal) || 0;
+            const ures = parseInt(uresVal) || 0;
 
             totalTeli += teli;
             totalTarol += tarol;
             totalUres += ures;
+            
             sets.push(teli + tarol);
+
+            rawSets.push({
+                teli: teliVal !== '' ? teli : 0,
+                tarol: tarolVal !== '' ? tarol : 0,
+                ures: uresVal !== '' ? ures : 0
+            });
         }
 
         players.push({
             id: idx + 1,
             name: name || `Játékos ${idx + 1}`,
-            team: team || '-',
+            club: club || '-',
             sets: sets,
+            rawSets: rawSets,
             teli: totalTeli,
             tarol: totalTarol,
             ures: totalUres,
