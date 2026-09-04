@@ -36,7 +36,7 @@
     
     .rank-col { width: 40px; color: #ffffff; font-weight: bold; text-align: center; }
     .name-col { text-align: left; font-family: sans-serif; color: #ffff00; width: 190px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .team-col { text-align: left; font-family: sans-serif; color: #00ff66; width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 1rem; }
+    .club-col { text-align: left; font-family: sans-serif; color: #00ff66; width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 1rem; }
     .stat-col { color: #8b949e; font-size: 1.1rem; }
     
     .color-green { color: #00ff66 !important; text-shadow: 0 0 5px rgba(0, 255, 102, 0.4); }
@@ -61,7 +61,7 @@
             <tr>
                 <th class="rank-col">#</th>
                 <th class="name-col">Név</th>
-                <th class="team-col">Csapat</th>
+                <th class="club-col">Egyesület</th>
                 <th>S1</th><th>S2</th><th>S3</th><th>S4</th>
                 <th>Teli</th>
                 <th>Tarol</th>
@@ -148,7 +148,7 @@ function renderBoard(players) {
         tr.innerHTML = `
             <td class="rank-col">${currentRank}.</td>
             <td class="name-col">${player.name || '-'}</td>
-            <td class="team-col">${player.team || '-'}</td>
+            <td class="club-col">${player.club || player.team || '-'}</td>
             ${setsHTML}
             <td class="stat-col">${player.teli}</td>
             <td class="stat-col">${player.tarol}</td>
