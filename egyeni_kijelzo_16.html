@@ -31,9 +31,23 @@
         text-shadow: 0 0 10px rgba(255, 255, 0, 0.4);
     }
     table { width: 100%; border-collapse: collapse; font-family: 'Courier New', Courier, monospace; }
-    th { color: #ffff00; border-bottom: 2px solid #0044aa; padding: 8px 4px; font-size: 1rem; }
-    td { padding: 8px 4px; text-align: center; border-bottom: 1px solid #002b66; font-size: 1.15rem; font-weight: bold; }
+    th { color: #ffff00; border-bottom: 2px solid #0044aa; padding: 10px 4px; font-size: 1rem; background-color: #001638; }
+    td { padding: 8px 4px; text-align: center; font-size: 1.15rem; font-weight: bold; }
     
+    /* Sorok elkülönítése - Alternáló háttérszínek */
+    tbody tr:nth-child(odd) {
+        background-color: rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid #002b66;
+    }
+    tbody tr:nth-child(even) {
+        background-color: rgba(0, 0, 0, 0.25);
+        border-bottom: 1px solid #002b66;
+    }
+    /* Egér föléhúzásakor kiemelés */
+    tbody tr:hover {
+        background-color: rgba(0, 102, 255, 0.25) !important;
+    }
+
     .rank-col { width: 40px; color: #ffffff; font-weight: bold; text-align: center; }
     .name-col { text-align: left; font-family: sans-serif; color: #ffff00; width: 190px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .club-col { text-align: left; font-family: sans-serif; color: #00ff66; width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 1rem; }
@@ -44,7 +58,10 @@
     .color-red { color: #ff3333 !important; text-shadow: 0 0 5px rgba(255, 51, 51, 0.4); }
 
     .total-col { font-weight: bold; font-size: 1.3rem; }
-    tr.top3 { background-color: rgba(0, 68, 170, 0.4); }
+    
+    /* Top 3 sorok kiemelése */
+    tr.top3 { background-color: rgba(0, 68, 170, 0.45) !important; }
+    tr.top3:nth-child(even) { background-color: rgba(0, 68, 170, 0.35) !important; }
     tr.top3 .rank-col { color: #ffff00; font-size: 1.25rem; }
 </style>
 
@@ -62,11 +79,11 @@
                 <th class="rank-col">#</th>
                 <th class="name-col">Név</th>
                 <th class="club-col">Egyesület</th>
+                <th class="total-col">Össz.</th>
                 <th>S1</th><th>S2</th><th>S3</th><th>S4</th>
                 <th>Teli</th>
                 <th>Tarol</th>
                 <th>Üres</th>
-                <th class="total-col">Össz.</th>
             </tr>
         </thead>
         <tbody id="boardBody"></tbody>
@@ -149,11 +166,11 @@ function renderBoard(players) {
             <td class="rank-col">${currentRank}.</td>
             <td class="name-col">${player.name || '-'}</td>
             <td class="club-col">${player.club || player.team || '-'}</td>
+            <td class="total-col ${getTotalColorClass(player.total)}">${player.total}</td>
             ${setsHTML}
             <td class="stat-col">${player.teli}</td>
             <td class="stat-col">${player.tarol}</td>
             <td class="stat-col ${getUresColorClass(player.ures)}">${player.ures}</td>
-            <td class="total-col ${getTotalColorClass(player.total)}">${player.total}</td>
         `;
 
         body.appendChild(tr);
